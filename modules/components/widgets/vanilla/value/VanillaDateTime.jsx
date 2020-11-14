@@ -1,5 +1,5 @@
 import React from "react";
-import moment from "moment";
+import dayjs from "dayjs";
 
 export default (props) => {
   const {value, setValue, config, valueFormat, use12Hours, readonly} = props;
@@ -9,7 +9,7 @@ export default (props) => {
     if (value == "")
       value = undefined;
     else
-      value = moment(new Date(value)).format(valueFormat);
+      value = dayjs(new Date(value)).format(valueFormat);
     setValue(value);
   };
 
@@ -17,7 +17,7 @@ export default (props) => {
   if (!value)
     dtValue = "";
   else
-    dtValue = moment(value).format("YYYY-MM-DDTHH:mm");
+    dtValue = dayjs(value).format("YYYY-MM-DDTHH:mm");
   
   return (
     <input type="datetime-local"  value={dtValue}  disabled={readonly} onChange={onChange} />

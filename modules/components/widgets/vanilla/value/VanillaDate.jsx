@@ -1,5 +1,4 @@
 import React from "react";
-import moment from "moment";
 
 export default (props) => {
   const {value, setValue, config, valueFormat, readonly} = props;
