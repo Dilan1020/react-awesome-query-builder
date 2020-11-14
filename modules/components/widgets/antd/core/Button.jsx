@@ -1,5 +1,6 @@
 import React from "react";
-import { Button } from "antd";
+// import { Button } from "antd";
+import Button from '@material-ui/core/Button'
 import { PlusOutlined, PlusCircleOutlined, DeleteFilled } from "@ant-design/icons";
 
 export default ({type, onClick, label, config: {settings}}) => {
@@ -36,8 +37,10 @@ export default ({type, onClick, label, config: {settings}}) => {
   return (
     <Button
       key={type}
-      type={typeToType[type] || "default"}
-      icon={typeToIcon[type]}
+      // type={typeToType[type] || "default"}
+      // icon={typeToIcon[type]}
+      variant={typeToType[type] || "default"}
+      startIcon={typeToIcon[type]}
       className={typeToClass[type]}
       onClick={onClick}
       size={renderSize}

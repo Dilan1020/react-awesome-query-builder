@@ -3,6 +3,44 @@ import map from "lodash/map";
 import { Button, Radio } from "antd";
 const ButtonGroup = Button.Group;
 
+const unselectedButtonStyle =
+{
+  backgroundColor: 'transparent',
+  color: '#556cd6',
+  border: '1px #556cd6',
+  fontSize: '0.875rem',
+  fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
+  fontWeight: 500,
+  letterSpacing: '0.02857em',
+  textTransform: 'uppercase'
+}
+
+const selectedButtonStyle =
+{
+  backgroundColor: '#556cd6',
+  color: 'white',
+  fontSize: '0.875rem',
+  fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
+  fontWeight: 500,
+  letterSpacing: '0.02857em',
+  textTransform: 'uppercase',
+  borderRadius: '4px',
+  padding: '6px 10px',
+  lineHeight: 0
+}
+
+
+const disabledButtonStyle =
+{
+  backgroundColor: 'transparent',
+  color: 'grey',
+  fontSize: '0.875rem',
+  fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
+  fontWeight: 500,
+  letterSpacing: '0.02857em',
+  textTransform: 'uppercase',
+  border: 'none',
+}
 
 class ConjsButton extends PureComponent {
   onClick = (_e) => {
@@ -18,6 +56,7 @@ class ConjsButton extends PureComponent {
         disabled={disabled}
         type={item.checked ? "primary" : null}
         onClick={this.onClick}
+        style={disabled ? disabledButtonStyle : item.checked ? selectedButtonStyle : unselectedButtonStyle}
       >{item.label}</Button>
     );
   }

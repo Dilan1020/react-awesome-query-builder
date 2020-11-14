@@ -3,7 +3,7 @@ import * as Widgets from "../components/widgets";
 import * as Operators from "../components/operators";
 import {SqlString} from "../utils/sql";
 import {escapeRegExp, getTitleInListValues} from "../utils/stuff";
-import moment from "moment";
+import dayjs from "dayjs";
 import {settings as defaultSettings} from "../config/default";
 
 const {
@@ -539,22 +539,22 @@ const widgets = {
       { label: "Date to", placeholder: "Enter date to" },
     ],
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return isForDisplay ? '"' + dateVal.format(wgtDef.dateFormat) + '"' : JSON.stringify(val);
     },
     sqlFormatValue: (val, fieldDef, wgtDef, op, opDef) => {
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return SqlString.escape(dateVal.format("YYYY-MM-DD"));
     },
-    jsonLogic: (val, fieldDef, wgtDef) => moment(val, wgtDef.valueFormat).toDate(),
+    jsonLogic: (val, fieldDef, wgtDef) => dayjs(val, wgtDef.valueFormat).toDate(),
     toJS: (val, fieldSettings) => {
-      const dateVal = moment(val, fieldSettings.valueFormat);
+      const dateVal = dayjs(val, fieldSettings.valueFormat);
       return dateVal.isValid() ? dateVal.toDate() : undefined;
     },
   },
   time: {
     type: "time",
-    jsType: "string",
+    jsType: "number",
     valueSrc: "value",
     factory: (props) => <VanillaTimeWidget {...props} />,
     timeFormat: "HH:mm",
@@ -568,21 +568,21 @@ const widgets = {
       { label: "Time to", placeholder: "Enter time to" },
     ],
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return isForDisplay ? '"' + dateVal.format(wgtDef.timeFormat) + '"' : JSON.stringify(val);
     },
     sqlFormatValue: (val, fieldDef, wgtDef, op, opDef) => {
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return SqlString.escape(dateVal.format("HH:mm:ss"));
     },
     jsonLogic: (val, fieldDef, wgtDef) => {
       // return seconds of day
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return dateVal.get("hour") * 60 * 60 + dateVal.get("minute") * 60 + dateVal.get("second");
     },
     toJS: (val, fieldSettings) => {
       // return seconds of day
-      const dateVal = moment(val, fieldSettings.valueFormat);
+      const dateVal = dayjs(val, fieldSettings.valueFormat);
       return dateVal.isValid() ? dateVal.get("hour") * 60 * 60 + dateVal.get("minute") * 60 + dateVal.get("second") : undefined;
     },
   },
@@ -603,16 +603,16 @@ const widgets = {
       { label: "Datetime to", placeholder: "Enter datetime to" },
     ],
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return isForDisplay ? '"' + dateVal.format(wgtDef.dateFormat + " " + wgtDef.timeFormat) + '"' : JSON.stringify(val);
     },
     sqlFormatValue: (val, fieldDef, wgtDef, op, opDef) => {
-      const dateVal = moment(val, wgtDef.valueFormat);
+      const dateVal = dayjs(val, wgtDef.valueFormat);
       return SqlString.escape(dateVal.toDate());
     },
-    jsonLogic: (val, fieldDef, wgtDef) => moment(val, wgtDef.valueFormat).toDate(),
+    jsonLogic: (val, fieldDef, wgtDef) => dayjs(val, wgtDef.valueFormat).toDate(),
     toJS: (val, fieldSettings) => {
-      const dateVal = moment(val, fieldSettings.valueFormat);
+      const dateVal = dayjs(val, fieldSettings.valueFormat);
       return dateVal.isValid() ? dateVal.toDate() : undefined;
     },
   },

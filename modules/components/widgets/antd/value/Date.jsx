@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { DatePicker } from "antd";
 const { RangePicker } = DatePicker;
-import moment from "moment";
+import dayjs from "dayjs";
 
 
 export default class DateWidget extends PureComponent {
@@ -36,7 +36,7 @@ export default class DateWidget extends PureComponent {
 
     isValidSingleValue = (value) => {
       const {valueFormat} = this.props;
-      let v = value ? moment(value, valueFormat) : null;
+      let v = value ? dayjs(value, valueFormat) : null;
       return !v || v && v.isValid();
     };
 
@@ -50,7 +50,7 @@ export default class DateWidget extends PureComponent {
 
     getMomentSingleValue = (value) => {
       const {valueFormat} = this.props;
-      let v = value ? moment(value, valueFormat) : null;
+      let v = value ? dayjs(value, valueFormat) : null;
       if (v && !v.isValid())
         v = null;
       return v;
