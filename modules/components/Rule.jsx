@@ -8,6 +8,9 @@ import Widget from "./Widget";
 import OperatorOptions from "./OperatorOptions";
 import {getFieldConfig, getFieldPathLabels, getOperatorConfig, getFieldWidgetConfig} from "../utils/configUtils";
 import {useOnPropsChanged} from "../utils/stuff";
+import { red } from '@material-ui/core/colors';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
 
 const Col = ({children, ...props}) => (<div {...props}>{children}</div>);
 const dummyFn = () => {};
@@ -216,11 +219,27 @@ class Rule extends PureComponent {
             ><DragIcon /> </span>
         ;
 
+        const trashButtonStyle = {
+          backgroundColor: red.A400,
+          color: 'white',
+          borderRadius: '4px'
+      };
+
       const del = (
         <div key="rule-header" className="rule--header">
-          {!immutableGroupsMode && <Btn 
+          {/* {!immutableGroupsMode && <Btn 
             type="delRule" onClick={this.removeSelf} label={deleteLabel} config={config}
-          />}
+          />} */}
+          {!immutableGroupsMode && <Button
+              type="danger"
+              icon={<DeleteOutlined />}
+              onClick={this.removeSelf}
+              size={this.props.config.settings.renderSize}
+              style={trashButtonStyle}
+          >
+              {deleteLabel}
+          </Button>
+          }
         </div>
       );
 

@@ -8,15 +8,15 @@ import {settings as defaultSettings} from "../config/default";
 
 const {
   //vanilla
-  VanillaBooleanWidget,
-  VanillaTextWidget,
-  VanillaDateWidget,
-  VanillaTimeWidget,
-  VanillaDateTimeWidget,
-  VanillaMultiSelectWidget,
-  VanillaSelectWidget,
-  VanillaNumberWidget,
-  VanillaSliderWidget,
+  BooleanWidget,
+  TextWidget,
+  DateWidget,
+  TimeWidget,
+  DateTimeWidget,
+  MultiSelectWidget,
+  SelectWidget,
+  NumberWidget,
+  SliderWidget,
 
   //common
   ValueFieldWidget,
@@ -100,8 +100,184 @@ const mongoFormatOp2 = (mops, not,  field, _op, values, useExpr) => {
   }
 };
 
+// Use this for case insensitve search
+const mongoFormatOp3 = (mop, mc, not, field, _op, value, useExpr) => {
+  console.log(mop, mc, not, field, _op, value, useExpr)
+  const mv = mc(value);
+  if (mv === undefined)
+      return undefined;
+  if (not) {
+      return !useExpr
+          ? { [field]: { "$not": { [mop]: mv, $options: "i" } } }
+          : { "$not": { [mop]: ["$" + field, mv] } };
+  } else {
+      if (!useExpr && mop === '$eq')
+          return { [field]: mv }; // short form
+      return !useExpr
+          ? { [field]: { [mop]: mv, $options: "i" } }
+          : { [mop]: ["$" + field, mv] };
+  }
+};
+
+// use this for date queries
+// Remember, lower dates are actually higher in value in MONGO
+const mongoFormatOp4 = (mop, mc, not, field, _op, value, useExpr) => {
+  const mv = mc(value);
+  if (_op === 'equal_date')
+      return { "$expr": { "$eq": [{ $toDate: mv }, `$${field}`] } }
+  else if (_op === 'not_equal_date')
+      return { "$expr": { "$ne": [{ $toDate: mv }, `$${field}`] } }
+  else if (_op === 'less_date')
+      return { "$expr": { "$gt": [{ $toDate: mv }, `$${field}`] } }
+  else if (_op === 'less_or_equal_date')
+      return { "$expr": { "$gte": [{ $toDate: mv }, `$${field}`] } }
+  else if (_op === 'greater_date')
+      return { "$expr": { "$lt": [{ $toDate: mv }, `$${field}`] } }
+  else if (_op === 'greater_or_equal_date')
+      return { "$expr": { "$lte": [{ $toDate: mv }, `$${field}`] } }
+  else if (_op === 'between_date')
+      return { "$and": [{ "$expr": { $gte: [{ $toDate: mv[1] }, `$${field}`] } }, { "$expr": { $lt: [{ $toDate: mv[0] }, `$${field}`] } }] }
+  else if (_op === 'not_between_date')
+      return { "$or": [{ "$expr": { $lt: [{ $toDate: mv[1] }, `$${field}`] } }, { "$expr": { $gte: [{ $toDate: mv[0] }, `$${field}`] } }] }
+};
 
 const operators = {
+  exists: {
+    label: "Exists",
+    labelForFormat: 'Exists',
+    mongoFormatOp: mongoFormatOp1.bind(null, '$exists', v => v, false),
+    jsonLogic: "!!", // This is wrong, it justs casts to bool. So !!false would be false. 
+  },
+  includes: {
+    label: 'Includes',
+    labelForFormat: 'Includes',
+    reversedOp: 'not_includes',
+    sqlOp: 'LIKE',
+    sqlFormatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions) => {
+        if (valueSrc === 'value') {
+            return `${field} LIKE ${values}`;
+        } else return undefined; // not supported
+    },
+    mongoFormatOp: mongoFormatOp3.bind(null, '$regex', v => (typeof v == 'string' ? escapeRegExp(v) : undefined), false),
+    //jsonLogic: (field, op, val) => ({ "in": [val, field] }),
+    jsonLogic: "in",
+    _jsonLogicIsRevArgs: true,
+    valueSources: ['value'],
+  },
+  not_includes: {
+    label: 'Not Includes',
+    reversedOp: 'includes',
+    labelForFormat: 'Not Includes',
+    sqlOp: 'NOT LIKE',
+    sqlFormatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions) => {
+        if (valueSrc === 'value') {
+            return `${field} NOT LIKE ${values}`;
+        } else return undefined; // not supported
+    },
+    mongoFormatOp: mongoFormatOp3.bind(null, '$regex', v => (typeof v == 'string' ? escapeRegExp(v) : undefined), true),
+    valueSources: ['value'],
+  },
+  equal_date: {
+    label: 'Equals',
+    labelForFormat: '==',
+    sqlOp: '=',
+    reversedOp: 'not_equal',
+    formatOp: (field, op, value, valueSrcs, valueTypes, opDef, operatorOptions, isForDisplay, fieldDef) => {
+        if (valueTypes === 'boolean' && isForDisplay)
+            return value === 'No' ? `NOT ${field}` : `${field}`;
+        else
+            return `${field} ${opDef.label} ${value}`;
+    },
+    mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+    jsonLogic: '==',
+  },
+  not_equal_date: {
+      label: 'Not Equals',
+      labelForFormat: '!=',
+      sqlOp: '<>',
+      reversedOp: 'equal',
+      formatOp: (field, op, value, valueSrcs, valueTypes, opDef, operatorOptions, isForDisplay, fieldDef) => {
+          if (valueTypes === 'boolean' && isForDisplay)
+              return value === 'No' ? `${field}` : `NOT ${field}`;
+          else
+              return `${field} ${opDef.label} ${value}`;
+      },
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      jsonLogic: '!=',
+  },
+  less_date: {
+      label: 'Less Than',
+      labelForFormat: '<',
+      sqlOp: '<',
+      reversedOp: 'greater_or_equal',
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      jsonLogic: '<',
+  },
+  less_or_equal_date: {
+      label: 'Less Than Or Equals',
+      labelForFormat: '<=',
+      sqlOp: '<=',
+      reversedOp: 'greater',
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      jsonLogic: '<=',
+  },
+  greater_date: {
+      label: 'Greater Than',
+      labelForFormat: '>',
+      sqlOp: '>',
+      reversedOp: 'less_or_equal',
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      jsonLogic: '>',
+  },
+  greater_or_equal_date: {
+      label: 'Greater Than Or Equals',
+      labelForFormat: '>=',
+      sqlOp: '>=',
+      reversedOp: 'less',
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      jsonLogic: '>=',
+  },
+  between_date: {
+      label: 'Between',
+      labelForFormat: 'BETWEEN',
+      sqlOp: 'BETWEEN',
+      cardinality: 2,
+      formatOp: (field, op, values, valueSrcs, valueTypes, opDef, operatorOptions, isForDisplay) => {
+          let valFrom = values.first();
+          let valTo = values.get(1);
+          if (isForDisplay)
+              return `${field} >= ${valFrom} AND ${field} <= ${valTo}`;
+          else
+              return `${field} >= ${valFrom} && ${field} <= ${valTo}`;
+      },
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      valueLabels: [
+          'Value from',
+          'Value to'
+      ],
+      textSeparators: [
+          null,
+          'and'
+      ],
+      reversedOp: 'not_between',
+      jsonLogic: "<=",
+  },
+  not_between_date: {
+      label: 'Not Between',
+      labelForFormat: 'NOT BETWEEN',
+      sqlOp: 'NOT BETWEEN',
+      cardinality: 2,
+      mongoFormatOp: mongoFormatOp4.bind(null, null, v => v, false),
+      valueLabels: [
+          'Value from',
+          'Value to'
+      ],
+      textSeparators: [
+          null,
+          'and'
+      ],
+      reversedOp: 'between',
+  },
   equal: {
     label: "==",
     labelForFormat: "==",
@@ -445,7 +621,7 @@ const widgets = {
     valueSrc: "value",
     valueLabel: "String",
     valuePlaceholder: "Enter string",
-    factory: (props) => <VanillaTextWidget {...props} />,
+    factory: (props) => <TextWidget {...props} />,
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
       return isForDisplay ? '"' + val + '"' : JSON.stringify(val);
     },
@@ -462,7 +638,7 @@ const widgets = {
     type: "number",
     jsType: "number",
     valueSrc: "value",
-    factory: (props) => <VanillaNumberWidget {...props} />,
+    factory: (props) => <NumberWidget {...props} />,
     valueLabel: "Number",
     valuePlaceholder: "Enter number",
     valueLabels: [
@@ -481,7 +657,7 @@ const widgets = {
     type: "number",
     jsType: "number",
     valueSrc: "value",
-    factory: (props) => <VanillaSliderWidget {...props} />,
+    factory: (props) => <SliderWidget {...props} />,
     valueLabel: "Number",
     valuePlaceholder: "Enter number or move slider",
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
@@ -496,7 +672,7 @@ const widgets = {
     type: "select",
     jsType: "string",
     valueSrc: "value",
-    factory: (props) => <VanillaSelectWidget {...props} />,
+    factory: (props) => <SelectWidget {...props} />,
     valueLabel: "Value",
     valuePlaceholder: "Select value",
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
@@ -512,7 +688,7 @@ const widgets = {
     type: "multiselect",
     jsType: "array",
     valueSrc: "value",
-    factory: (props) => <VanillaMultiSelectWidget {...props} />,
+    factory: (props) => <MultiSelectWidget {...props} />,
     valueLabel: "Values",
     valuePlaceholder: "Select values",
     formatValue: (vals, fieldDef, wgtDef, isForDisplay) => {
@@ -528,8 +704,8 @@ const widgets = {
     type: "date",
     jsType: "string",
     valueSrc: "value",
-    factory: (props) => <VanillaDateWidget {...props} />,
-    dateFormat: "DD.MM.YYYY",
+    factory: (props) => <DateWidget {...props} />,
+    dateFormat: "YYYY-MM-DD",
     valueFormat: "YYYY-MM-DD",
     useKeyboard: true,
     valueLabel: "Date",
@@ -556,7 +732,7 @@ const widgets = {
     type: "time",
     jsType: "number",
     valueSrc: "value",
-    factory: (props) => <VanillaTimeWidget {...props} />,
+    factory: (props) => <TimeWidget {...props} />,
     timeFormat: "HH:mm",
     valueFormat: "HH:mm:ss",
     use12Hours: false,
@@ -590,7 +766,7 @@ const widgets = {
     type: "datetime",
     jsType: "string",
     valueSrc: "value",
-    factory: (props) => <VanillaDateTimeWidget {...props} />,
+    factory: (props) => <DateTimeWidget {...props} />,
     timeFormat: "HH:mm",
     dateFormat: "DD.MM.YYYY",
     valueFormat: "YYYY-MM-DD HH:mm:ss",
@@ -620,7 +796,7 @@ const widgets = {
     type: "boolean",
     jsType: "boolean",
     valueSrc: "value",
-    factory: (props) => <VanillaBooleanWidget {...props} />,
+    factory: (props) => <BooleanWidget {...props} />,
     labelYes: "Yes",
     labelNo: "No",
     formatValue: (val, fieldDef, wgtDef, isForDisplay) => {
@@ -726,16 +902,16 @@ const types = {
     widgets: {
       date: {
         operators: [
-          "equal",
-          "not_equal",
-          "less",
-          "less_or_equal",
-          "greater",
-          "greater_or_equal",
-          "between",
-          "not_between",
+          "equal_date",
+          "not_equal_date",
+          "less_date",
+          "less_or_equal_date",
+          "greater_date",
+          "greater_or_equal_date",
+          "between_date",
+          "not_between_date",
           "is_empty",
-          "is_not_empty"
+          "is_not_empty",
         ]
       }
     },
@@ -834,6 +1010,24 @@ const types = {
       }
     },
   },
+  other: {
+    defaultOperator: 'exists',
+    widgets: {
+        boolean: {
+            operators: [
+                "exists",
+            ],
+            widgetProps: {
+
+            }
+        },
+        field: {
+            operators: [
+                "exists"
+            ]
+        }
+    }
+  }
 };
 
 //----------------------------  settings
