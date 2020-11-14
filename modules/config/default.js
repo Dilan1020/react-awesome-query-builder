@@ -1,13 +1,13 @@
 import * as Widgets from "../components/widgets";
 import React from "react";
 const {
-  VanillaFieldSelect,
-  VanillaConjs,
-  VanillaButton,
-  VanillaButtonGroup,
-  VanillaProvider,
-  VanillaValueSources,
-  vanillaConfirm,
+  FieldSelect,
+  Conjs,
+  Button,
+  ButtonGroup,
+  Provider,
+  ValueSources,
+  confirm,
 } = Widgets;
 
 export const settings = {
@@ -18,15 +18,15 @@ export const settings = {
       return field;
   },
 
-  renderField: (props) => <VanillaFieldSelect {...props} />,
-  renderOperator: (props) => <VanillaFieldSelect {...props} />,
-  renderFunc: (props) => <VanillaFieldSelect {...props} />,
-  renderConjs: (props) => <VanillaConjs {...props} />,
-  renderButton: (props) => <VanillaButton {...props} />,
-  renderButtonGroup: (props) => <VanillaButtonGroup {...props} />,
-  renderProvider: (props) => <VanillaProvider {...props} />,
-  renderValueSources: (props) => <VanillaValueSources {...props} />,
-  renderConfirm: vanillaConfirm,
+  renderField: (props) => <FieldSelect {...props} />,
+  renderOperator: (props) => <FieldSelect {...props} />,
+  renderFunc: (props) => <FieldSelect {...props} />,
+  renderConjs: (props) => <Conjs {...props} />,
+  renderButton: (props) => <Button {...props} />,
+  renderButtonGroup: (props) => <ButtonGroup {...props} />,
+  renderProvider: (props) => <Provider {...props} />,
+  renderValueSources: (props) => <ValueSources {...props} />,
+  renderConfirm: confirm,
 
   valueSourcesInfo: {
     value: {},
@@ -38,7 +38,7 @@ export const settings = {
   hideConjForOne: true,
   canReorder: true,
   canRegroup: true,
-  showNot: true,
+  showNot: false,
   canShortMongoQuery: true,
   groupActionsPosition: "topRight", // oneOf [topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight]
   setOpOnChangeField: ["keep", "default"], // 'default' (default if present), 'keep' (keep prev from last field), 'first', 'none'

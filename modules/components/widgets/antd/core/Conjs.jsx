@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import map from "lodash/map";
-import { Button, Radio } from "antd";
+import { Button } from "antd";
 const ButtonGroup = Button.Group;
 
 const unselectedButtonStyle =
