@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import { Popover, Radio } from "antd";
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-import { EllipsisOutlined } from "@ant-design/icons";
+import EllipsisOutlined from "@ant-design/icons/EllipsisOutlined";
 
 export default class ValueSources extends PureComponent {
   onChange = (e) => {

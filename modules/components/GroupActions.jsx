@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import Button from '@material-ui/core/Button'
 import { red } from '@material-ui/core/colors';
-import { DeleteOutlined } from '@ant-design/icons'
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined'
 import AddIcon from '@material-ui/icons/Add';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 

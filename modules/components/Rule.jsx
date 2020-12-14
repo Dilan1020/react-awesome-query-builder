@@ -1,4 +1,4 @@
-import React, { Component, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import RuleContainer from "./containers/RuleContainer";
 import Draggable from "./containers/Draggable";
@@ -6,10 +6,10 @@ import Field from "./Field";
 import Operator from "./Operator";
 import Widget from "./Widget";
 import OperatorOptions from "./OperatorOptions";
-import {getFieldConfig, getFieldPathLabels, getOperatorConfig, getFieldWidgetConfig} from "../utils/configUtils";
-import {useOnPropsChanged} from "../utils/stuff";
+import { getFieldConfig, getFieldPathLabels, getOperatorConfig, getFieldWidgetConfig } from "../utils/configUtils";
+import { useOnPropsChanged } from "../utils/stuff";
 import { red } from '@material-ui/core/colors';
-import { DeleteOutlined } from '@ant-design/icons';
+import DeleteOutlined  from '@ant-design/icons/DeleteOutlined';
 import { Button } from 'antd';
 
 const Col = ({children, ...props}) => (<div {...props}>{children}</div>);

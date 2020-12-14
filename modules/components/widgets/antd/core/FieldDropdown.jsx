@@ -4,7 +4,7 @@ import keys from "lodash/keys";
 import { Menu, Dropdown, Tooltip, Button } from "antd";
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
-import { DownOutlined } from "@ant-design/icons";
+import DownOutlined from "@ant-design/icons/DownOutlined";
 
 
 export default class FieldDropdown extends PureComponent {

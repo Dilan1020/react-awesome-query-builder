@@ -1,7 +1,10 @@
+/* eslint-disable react/display-name */
 import React from "react";
 // import { Button } from "antd";
 import Button from '@material-ui/core/Button'
-import { PlusOutlined, PlusCircleOutlined, DeleteFilled } from "@ant-design/icons";
+import PlusOutlined from "@ant-design/icons/PlusOutlined";
+import PlusCircleOutlined from "@ant-design/icons/PlusCircleOutlined";
+import DeleteFilled from "@ant-design/icons/DeleteFilled";
 
 export default ({type, onClick, label, config: {settings}}) => {
   const typeToIcon = {
